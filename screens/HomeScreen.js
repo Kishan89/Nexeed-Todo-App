@@ -121,13 +121,21 @@ const HomeScreen = () => {
     ]);
   };
 
-  const handleToggleComplete = async (task) => {
-    try {
-      await updateDoc(doc(db, "tasks", task.id), {
-        completed: !task.completed,
-      });
-    } catch {}
-  };
+const handleToggleComplete = async (task) => {
+  const updated = !task.completed;
+  setTasks((prev) =>
+    prev.map((t) => (t.id === task.id ? { ...t, completed: updated } : t))
+  );
+  try {
+    await updateDoc(doc(db, "tasks", task.id), { completed: updated });
+  } catch (error) {
+    setTasks((prev) =>
+      prev.map((t) => (t.id === task.id ? { ...t, completed: task.completed } : t))
+    );
+    console.log("Error toggling complete:", error);
+  }
+};
+
 
   const openEditModal = (task) => {
     setCurrentTask(task);
@@ -135,21 +143,24 @@ const HomeScreen = () => {
     setModalVisible(true);
   };
 
- const handleUpdateTask = async () => {
-  if (!currentTask || editText.trim() === "") return;
-  try {
-    await updateDoc(doc(db, "tasks", currentTask.id), {
-      text: editText.trim(),
-    });
-    setTasks((prev) =>
-      prev.map((t) =>
-        t.id === currentTask.id ? { ...t, text: editText.trim() } : t
-      )
-    );
-    setModalVisible(false);
-  } catch {}
-};
-
+  const handleUpdateTask = async () => {
+    if (!currentTask || editText.trim() === "") return;
+    try {
+      await updateDoc(doc(db, "tasks", currentTask.id), {
+        text: editText.trim(),
+      });
+      setTasks((prev) =>
+        prev.map((t) =>
+          t.id === currentTask.id ? { ...t, text: editText.trim() } : t
+        )
+      );
+      setModalVisible(false);
+      setCurrentTask(null);
+      setEditText("");
+    } catch (error) {
+      console.log("Error updating task:", error);
+    }
+  };
 
   const handleLogout = () => {
     Alert.alert("Logout", "Are you sure you want to log out?", [
@@ -188,7 +199,7 @@ const HomeScreen = () => {
                 <Text style={styles.userName}>{currentUser.displayName}</Text>
               ) : (
                 <View style={styles.nameLoader}>
-                  <LoaderOverlay  />
+                  <LoaderOverlay />
                 </View>
               )}
               <Text style={styles.subtitle}>Let's crush your goals today.</Text>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   View,
   Text,
@@ -11,7 +11,6 @@ import {
   SafeAreaView,
   StatusBar,
   Keyboard,
-  ActivityIndicator,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -27,8 +26,10 @@ import {
   deleteDoc,
   doc,
   serverTimestamp,
+  orderBy,
 } from "firebase/firestore";
 import TaskItem from "../components/TaskItem";
+import LoaderOverlay from "../components/LoaderOverlay";
 
 const HomeScreen = () => {
   const [tasks, setTasks] = useState([]);
@@ -37,6 +38,7 @@ const HomeScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [currentTask, setCurrentTask] = useState(null);
   const [editText, setEditText] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const currentUser = auth.currentUser;
   const insets = useSafeAreaInsets();
@@ -45,28 +47,33 @@ const HomeScreen = () => {
     if (!currentUser) return;
     const q = query(
       collection(db, "tasks"),
-      where("userId", "==", currentUser.uid)
+      where("userId", "==", currentUser.uid),
+      orderBy("createdAt", "desc")
     );
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      let tasksList = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
-      setTasks(tasksList);
-    });
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        let tasksList = snapshot.docs.map((d) => ({
+          id: d.id,
+          ...d.data(),
+        }));
+        setTasks(tasksList);
+        setLoading(false);
+      },
+      () => setLoading(false)
+    );
     return () => unsubscribe();
   }, [currentUser]);
 
   const filteredTasks = useMemo(() => {
-    const sortedTasks = [...tasks].sort(
-      (a, b) => (b.createdAt?.toDate() || 0) - (a.createdAt?.toDate() || 0)
-    );
-    if (filter === "Active") return sortedTasks.filter((t) => !t.completed);
-    if (filter === "Completed") return sortedTasks.filter((t) => t.completed);
-    return sortedTasks;
+    if (filter === "Active") return tasks.filter((t) => !t.completed);
+    if (filter === "Completed") return tasks.filter((t) => t.completed);
+    return tasks;
   }, [tasks, filter]);
 
   const handleAddTask = async () => {
     const text = newTask.trim();
     if (text === "" || !currentUser) return;
-
     const tempId = Date.now().toString();
     const optimisticTask = {
       id: tempId,
@@ -75,21 +82,23 @@ const HomeScreen = () => {
       userId: currentUser.uid,
       createdAt: { toDate: () => new Date() },
     };
-
-    setTasks((prevTasks) => [optimisticTask, ...prevTasks]);
+    setTasks((prev) => [optimisticTask, ...prev]);
     setNewTask("");
     Keyboard.dismiss();
-
     try {
-      await addDoc(collection(db, "tasks"), {
+      const docRef = await addDoc(collection(db, "tasks"), {
         text,
         completed: false,
         userId: currentUser.uid,
         createdAt: serverTimestamp(),
       });
-    } catch (e) {
-      Alert.alert("Error", "Could not add task. Please try again.");
-      setTasks((prevTasks) => prevTasks.filter((task) => task.id !== tempId));
+      setTasks((prev) =>
+        prev.map((task) =>
+          task.id === tempId ? { ...task, id: docRef.id } : task
+        )
+      );
+    } catch {
+      setTasks((prev) => prev.filter((t) => t.id !== tempId));
     }
   };
 
@@ -101,14 +110,10 @@ const HomeScreen = () => {
         style: "destructive",
         onPress: async () => {
           const originalTasks = [...tasks];
-          setTasks((prevTasks) =>
-            prevTasks.filter((task) => task.id !== taskId)
-          );
-
+          setTasks((prev) => prev.filter((t) => t.id !== taskId));
           try {
             await deleteDoc(doc(db, "tasks", taskId));
-          } catch (e) {
-            Alert.alert("Error", "Could not delete task. Please try again.");
+          } catch {
             setTasks(originalTasks);
           }
         },
@@ -121,9 +126,7 @@ const HomeScreen = () => {
       await updateDoc(doc(db, "tasks", task.id), {
         completed: !task.completed,
       });
-    } catch (e) {
-      Alert.alert("Error", "Could not update task status.");
-    }
+    } catch {}
   };
 
   const openEditModal = (task) => {
@@ -132,26 +135,26 @@ const HomeScreen = () => {
     setModalVisible(true);
   };
 
-  const handleUpdateTask = async () => {
-    if (!currentTask || editText.trim() === "") return;
-    try {
-      await updateDoc(doc(db, "tasks", currentTask.id), {
-        text: editText.trim(),
-      });
-      setModalVisible(false);
-    } catch (e) {
-      Alert.alert("Error", "Could not save changes.");
-    }
-  };
+ const handleUpdateTask = async () => {
+  if (!currentTask || editText.trim() === "") return;
+  try {
+    await updateDoc(doc(db, "tasks", currentTask.id), {
+      text: editText.trim(),
+    });
+    setTasks((prev) =>
+      prev.map((t) =>
+        t.id === currentTask.id ? { ...t, text: editText.trim() } : t
+      )
+    );
+    setModalVisible(false);
+  } catch {}
+};
+
 
   const handleLogout = () => {
     Alert.alert("Logout", "Are you sure you want to log out?", [
       { text: "Cancel", style: "cancel" },
-      {
-        text: "Logout",
-        style: "destructive",
-        onPress: () => auth.signOut(),
-      },
+      { text: "Logout", style: "destructive", onPress: () => auth.signOut() },
     ]);
   };
 
@@ -166,51 +169,34 @@ const HomeScreen = () => {
     if (filter === "Active" && tasks.some((t) => t.completed))
       return { title: "All done!", subtitle: "Enjoy your break 🎉" };
     if (filter === "Completed" && tasks.some((t) => !t.completed))
-      return {
-        title: "Keep going!",
-        subtitle: "Finish tasks to see them here 💪",
-      };
-    return {
-      title: "Let's get productive",
-      subtitle: "Add your first task 🚀",
-    };
+      return { title: "Keep going!", subtitle: "Finish tasks to see them here 💪" };
+    return { title: "Let's get productive", subtitle: "Add your first task 🚀" };
   }, [filter, tasks]);
 
   return (
     <LinearGradient
-      colors={["#111827", "#312E81", "#1E1B4B"]
-}
+      colors={["#111827", "#312E81", "#1E1B4B"]}
       style={styles.container}
     >
       <SafeAreaView style={[styles.safeArea, { paddingTop: insets.top }]}>
         <StatusBar barStyle="light-content" />
         <View style={{ flex: 1 }}>
-          {/* Header */}
           <View style={styles.header}>
             <View>
               <Text style={styles.greeting}>{`Good ${getGreeting()},`}</Text>
-
               {currentUser?.displayName ? (
                 <Text style={styles.userName}>{currentUser.displayName}</Text>
               ) : (
                 <View style={styles.nameLoader}>
-                  <ActivityIndicator size="small" color="#8B5CF6" />
+                  <LoaderOverlay  />
                 </View>
               )}
-
-              <Text style={styles.subtitle}>
-                Let's crush your goals today.
-              </Text>
+              <Text style={styles.subtitle}>Let's crush your goals today.</Text>
             </View>
-            <TouchableOpacity
-              onPress={handleLogout}
-              style={styles.logoutButton}
-            >
+            <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
               <Feather name="log-out" size={22} color="#E5E7EB" />
             </TouchableOpacity>
           </View>
-
-          {/* Input */}
           <View style={styles.inputContainer}>
             <Feather
               name="plus-circle"
@@ -224,12 +210,12 @@ const HomeScreen = () => {
               placeholderTextColor="#9CA3AF"
               value={newTask}
               onChangeText={setNewTask}
-              onSubmitEditing={handleAddTask}
               returnKeyType="done"
             />
+            <TouchableOpacity onPress={handleAddTask} style={styles.addButton}>
+              <Feather name="send" size={26} color="#A78BFA" />
+            </TouchableOpacity>
           </View>
-
-          {/* Filters */}
           <View style={styles.filterContainer}>
             {["All", "Active", "Completed"].map((f) => (
               <TouchableOpacity
@@ -251,8 +237,6 @@ const HomeScreen = () => {
               </TouchableOpacity>
             ))}
           </View>
-
-          {/* Task List */}
           <FlatList
             data={filteredTasks}
             keyExtractor={(item) => item.id}
@@ -267,9 +251,7 @@ const HomeScreen = () => {
             ListEmptyComponent={
               <View style={styles.emptyContainer}>
                 <Text style={styles.emptyTitle}>{emptyMessage.title}</Text>
-                <Text style={styles.emptySubtitle}>
-                  {emptyMessage.subtitle}
-                </Text>
+                <Text style={styles.emptySubtitle}>{emptyMessage.subtitle}</Text>
               </View>
             }
             contentContainerStyle={[
@@ -279,8 +261,6 @@ const HomeScreen = () => {
             showsVerticalScrollIndicator={false}
           />
         </View>
-
-        {/* Edit Modal */}
         <Modal visible={modalVisible} transparent animationType="fade">
           <View style={styles.modalBackdrop}>
             <View style={styles.modalContent}>
@@ -308,12 +288,12 @@ const HomeScreen = () => {
             </View>
           </View>
         </Modal>
+        {loading && <LoaderOverlay message="Fetching tasks..." />}
       </SafeAreaView>
     </LinearGradient>
   );
 };
 
-// 🎨 Modernized Styles
 const spacing = { xs: 4, sm: 8, md: 16, lg: 18, xl: 32 };
 
 const styles = StyleSheet.create({
@@ -327,17 +307,8 @@ const styles = StyleSheet.create({
     paddingTop: spacing.md,
   },
   greeting: { color: "#F9FAFB", fontSize: 22, fontWeight: "600" },
-  userName: {
-    color: "#FFFFFF",
-    fontSize: 28,
-    fontWeight: "700",
-    marginTop: 4,
-  },
-  nameLoader: {
-    height: 34,
-    justifyContent: "center",
-    marginTop: 4,
-  },
+  userName: { color: "#FFFFFF", fontSize: 28, fontWeight: "700", marginTop: 4 },
+  nameLoader: { height: 34, justifyContent: "center", marginTop: 4 },
   subtitle: { color: "#A5B4FC", fontSize: 15, marginTop: 6 },
   logoutButton: {
     padding: spacing.sm,
@@ -356,6 +327,7 @@ const styles = StyleSheet.create({
   },
   inputIcon: { paddingLeft: spacing.md },
   input: { flex: 1, padding: spacing.md, fontSize: 16, color: "#F9FAFB" },
+  addButton: { paddingRight: spacing.md, paddingVertical: spacing.sm },
   filterContainer: {
     flexDirection: "row",
     gap: spacing.sm,
@@ -378,11 +350,7 @@ const styles = StyleSheet.create({
   filterText: { color: "#9CA3AF", fontWeight: "600" },
   filterTextActive: { color: "#FFFFFF" },
   listContent: { paddingHorizontal: spacing.lg },
-  emptyContainer: {
-    marginTop: 80,
-    alignItems: "center",
-    paddingHorizontal: spacing.lg,
-  },
+  emptyContainer: { marginTop: 80, alignItems: "center", paddingHorizontal: spacing.lg },
   emptyTitle: {
     fontSize: 18,
     fontWeight: "700",

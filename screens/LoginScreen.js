@@ -1,16 +1,14 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   StyleSheet, Text, View, Alert, TouchableOpacity,
   KeyboardAvoidingView, SafeAreaView, ScrollView, Platform, StatusBar, Image
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-
 import { auth } from '../config/firebaseConfig';
 import Input from '../components/Input';
 import Button from '../components/Button';
 
-// Helper for user-friendly Firebase error messages
 const getFriendlyErrorMessage = (code) => {
   switch (code) {
     case 'auth/user-not-found':
@@ -34,11 +32,9 @@ export default function LoginScreen({ navigation }) {
       Alert.alert('Missing Information', 'Please enter both email and password.');
       return;
     }
-
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email.trim(), password);
-      // The AppNavigator will automatically handle navigation to HomeScreen on successful login
     } catch (err) {
       const friendlyMessage = getFriendlyErrorMessage(err.code);
       Alert.alert('Login Failed', friendlyMessage);
@@ -48,30 +44,23 @@ export default function LoginScreen({ navigation }) {
   };
 
   return (
-    <LinearGradient colors={['#0D1117', '#111827']} style={styles.container}>
+    <LinearGradient colors={[ '#1c1855ff','#0f172a']} style={styles.container}>
       <StatusBar barStyle="light-content" />
       <SafeAreaView style={styles.safeArea}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={styles.flex}
-        >
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.flex}>
           <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-
-            {/* 🔥 App Logo on Top */}
             <View style={styles.logoContainer}>
               <Image 
-                source={require('../assets/icon.png')} // <-- apna logo ka naam/extension sahi lagao
+                source={require('../assets/icon.png')}
                 style={styles.logo}
                 resizeMode="contain"
               />
             </View>
-
             <View style={styles.header}>
               <Text style={styles.title}>Welcome Back</Text>
-              <Text style={styles.subtitle}>Sign in to manage your tasks.</Text>
+              <Text style={styles.subtitle}>Sign in to continue your journey</Text>
             </View>
-
-            <View style={styles.card}>
+            <LinearGradient colors={['rgba(17, 24, 39, 0.9)', 'rgba(30, 41, 59, 0.95)']} style={styles.card}>
               <Input
                 placeholder="Email"
                 value={email}
@@ -87,25 +76,13 @@ export default function LoginScreen({ navigation }) {
                 secureTextEntry
                 editable={!loading}
               />
-
-              {/* NEW "Forgot Password?" LINK */}
-              <TouchableOpacity 
-                style={styles.forgotPasswordContainer} 
-                onPress={() => navigation.navigate('ForgotPassword')}
-              >
+              <TouchableOpacity style={styles.forgotPasswordContainer} onPress={() => navigation.navigate('ForgotPassword')}>
                 <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
               </TouchableOpacity>
-
               <View style={styles.buttonContainer}>
-                <Button
-                  title="Login"
-                  onPress={handleLogin}
-                  loading={loading}
-                  disabled={loading}
-                />
+                <Button title="Login" onPress={handleLogin} loading={loading} disabled={loading} />
               </View>
-            </View>
-
+            </LinearGradient>
             <View style={styles.footer}>
               <Text style={styles.footerText}>Don't have an account?</Text>
               <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
@@ -124,41 +101,16 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1 },
   flex: { flex: 1 },
   scrollContainer: { flexGrow: 1, justifyContent: 'center', padding: 24 },
-
-  // 🔥 New logo styles
-  logoContainer: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  logo: {
-    width: 120,
-    height: 120,
-  },
-
+  logoContainer: { alignItems: 'center', marginBottom: 20 },
+  logo: { width: 120, height: 120 },
   header: { marginBottom: 24, alignItems: 'center' },
   title: { fontSize: 32, fontWeight: 'bold', color: '#F9FAFB' },
-  subtitle: { color: '#9CA3AF', marginTop: 8, fontSize: 16 },
-  card: {
-    backgroundColor: '#1F2937',
-    borderRadius: 16,
-    padding: 24,
-  },
-  
-  forgotPasswordContainer: {
-    alignItems: 'flex-end',
-    marginBottom: 16,
-  },
-  forgotPasswordText: {
-    color: '#cbc8f0ff',
-    fontWeight: '600',
-  },
-  
+  subtitle: { color: '#CBD5E1', marginTop: 8, fontSize: 16 },
+  card: { borderRadius: 20, padding: 24, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 10, elevation: 5 },
+  forgotPasswordContainer: { alignItems: 'flex-end', marginBottom: 16 },
+  forgotPasswordText: { color: '#0EA5E9', fontWeight: '600' },
   buttonContainer: { marginTop: 8 },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 24,
-  },
-  footerText: { color: '#9CA3AF', fontSize: 14 },
-  footerLink: { color: '#8B5CF6', fontWeight: 'bold', fontSize: 14 },
+  footer: { flexDirection: 'row', justifyContent: 'center', marginTop: 24 },
+  footerText: { color: '#CBD5E1', fontSize: 14 },
+  footerLink: { color: '#0EA5E9', fontWeight: 'bold', fontSize: 14 },
 });

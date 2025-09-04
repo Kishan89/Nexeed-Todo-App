@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   StyleSheet, Text, View, Alert, TouchableOpacity,
-  SafeAreaView, Platform, StatusBar, Image
+  SafeAreaView, KeyboardAvoidingView, ScrollView,
+  Platform, StatusBar, Image
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '../config/firebaseConfig';
 import Input from '../components/Input';
 import Button from '../components/Button';
-import { Feather } from '@expo/vector-icons';
 
 export default function ForgotPasswordScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -25,7 +25,7 @@ export default function ForgotPasswordScreen({ navigation }) {
       await sendPasswordResetEmail(auth, email.trim());
       Alert.alert(
         'Check Your Email',
-        'A link to reset your password has been sent to your email address.'
+        'A reset link has been sent to your email.'
       );
       navigation.goBack();
     } catch (err) {
@@ -36,57 +36,60 @@ export default function ForgotPasswordScreen({ navigation }) {
   };
 
   return (
-    <LinearGradient colors={['#0D1117', '#111827']} style={styles.container}>
+    <LinearGradient colors={['#0f172a', '#1e293b']} style={styles.container}>
       <StatusBar barStyle="light-content" />
       <SafeAreaView style={styles.safeArea}>
-        <View style={styles.content}>
-
-          {/* 🔙 Back Button */}
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Feather name="arrow-left" size={24} color="#E5E7EB" />
-          </TouchableOpacity>
-
-          {/* 🔥 App Logo */}
-          <View style={styles.logoContainer}>
-            <Image 
-              source={require('../assets/icon.png')} // apna logo ka naam/extension sahi lagao
-              style={styles.logo}
-              resizeMode="contain"
-            />
-          </View>
-
-          <View style={styles.header}>
-            <Text style={styles.title}>Reset Password</Text>
-            <Text style={styles.subtitle}>
-              Enter your email to receive a reset link.
-            </Text>
-          </View>
-
-          <View style={styles.card}>
-            <Input
-              placeholder="Your Email Address"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              editable={!loading}
-            />
-            <View style={styles.buttonContainer}>
-              <Button
-                title="Send Reset Link"
-                onPress={handlePasswordReset}
-                loading={loading}
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.flex}
+        >
+          <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+            <View style={styles.logoContainer}>
+              <Image
+                source={require('../assets/icon.png')}
+                style={styles.logo}
+                resizeMode="contain"
               />
             </View>
-          </View>
 
-          {/* 🔙 Back to Login */}
-          <TouchableOpacity style={styles.footer} onPress={() => navigation.navigate('Login')}>
-            <Feather name="log-in" size={16} color="#8B5CF6" />
-            <Text style={styles.footerLink}> Back to Login</Text>
-          </TouchableOpacity>
+            <View style={styles.header}>
+              <Text style={styles.title}>Reset Password</Text>
+              <Text style={styles.subtitle}>
+                Enter your email to get a reset link
+              </Text>
+            </View>
 
-        </View>
+            <LinearGradient
+              colors={['rgba(17, 24, 39, 0.9)', 'rgba(30, 41, 59, 0.95)']}
+              style={styles.card}
+            >
+              <Input
+                placeholder="Your Email Address"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                editable={!loading}
+              />
+
+              <View style={styles.buttonContainer}>
+                <Button
+                  title="Send Reset Link"
+                  onPress={handlePasswordReset}
+                  loading={loading}
+                  disabled={loading}
+                />
+              </View>
+            </LinearGradient>
+
+            <View style={styles.footer}>
+              <Text style={styles.footerText}>Remember your password?</Text>
+              <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+                <Text style={styles.footerLink}> Back to Login</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
       </SafeAreaView>
     </LinearGradient>
   );
@@ -95,39 +98,28 @@ export default function ForgotPasswordScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   safeArea: { flex: 1 },
-  content: { flex: 1, justifyContent: 'center', padding: 24 },
+  flex: { flex: 1 },
+  scrollContainer: { flexGrow: 1, justifyContent: 'center', padding: 24 },
 
-  backButton: { 
-    position: 'absolute', 
-    top: Platform.OS === 'ios' ? 50 : 20, 
-    left: 20, 
-    padding: 8 
-  },
-
-  // 🔥 Logo
-  logoContainer: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
+  logoContainer: { alignItems: 'center', marginBottom: 20 },
   logo: { width: 120, height: 120 },
 
   header: { marginBottom: 24, alignItems: 'center' },
-  title: { fontSize: 32, fontWeight: 'bold', color: '#F9FAFB' },
-  subtitle: { color: '#9CA3AF', marginTop: 8, fontSize: 16, textAlign: 'center' },
+  title: { fontSize: 28, fontWeight: 'bold', color: '#F9FAFB' },
+  subtitle: { color: '#CBD5E1', marginTop: 8, fontSize: 16, textAlign: 'center' },
 
-  card: { backgroundColor: '#1F2937', borderRadius: 16, padding: 24 },
+  card: {
+    borderRadius: 20,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+
   buttonContainer: { marginTop: 8 },
 
-  // 🔙 Footer Link
-  footer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 24,
-  },
-  footerLink: {
-    color: '#8B5CF6',
-    fontWeight: '600',
-    fontSize: 15,
-  },
+  footer: { flexDirection: 'row', justifyContent: 'center', marginTop: 24 },
+  footerText: { color: '#CBD5E1', fontSize: 14 },
+  footerLink: { color: '#0EA5E9', fontWeight: 'bold', fontSize: 14 },
 });

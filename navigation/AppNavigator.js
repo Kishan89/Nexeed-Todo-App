@@ -1,6 +1,4 @@
-// navigation/AppNavigator.js
-
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -17,27 +15,32 @@ const MyTheme = {
   ...DarkTheme,
   colors: {
     ...DarkTheme.colors,
-    background: '#0D1117', // Aapke gradient ka starting color
+    background: '#0D1117', 
   },
 };
 
 const AppNavigator = () => {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (authenticatedUser) => {
       setUser(authenticatedUser);
+      setLoading(false);
     });
+
     return () => unsubscribe();
   }, []);
 
+  if (loading) {
+    return null;
+  }
+
   return (
     <NavigationContainer theme={MyTheme}> 
-      {/* YAHAN 'screenOptions' MEIN CHANGE KIYA HAI */}
       <Stack.Navigator
         screenOptions={{
           headerShown: false,
-          // YEH LINE CARD BACKGROUND KO TRANSPARENT KARTI HAI
           cardStyle: { backgroundColor: 'transparent' },
         }}
       >

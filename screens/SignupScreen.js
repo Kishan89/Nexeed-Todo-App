@@ -27,13 +27,10 @@ export default function SignupScreen({ navigation }) {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email.trim(), password);
       const user = userCredential.user;
-
-      // ✅ update profile with displayName
       await updateProfile(auth.currentUser, {
         displayName: name.trim(),
       });
 
-      // ✅ Firestore entry
       await setDoc(doc(db, 'users', user.uid), {
         uid: user.uid,
         name: name.trim(),
@@ -58,10 +55,9 @@ export default function SignupScreen({ navigation }) {
         >
           <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
 
-            {/* 🔥 App Logo on Top */}
             <View style={styles.logoContainer}>
               <Image 
-                source={require('../assets/icon.png')} // apna logo ka naam/extension sahi lagao
+                source={require('../assets/icon.png')} 
                 style={styles.logo}
                 resizeMode="contain"
               />
@@ -123,7 +119,6 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   scrollContainer: { flexGrow: 1, justifyContent: 'center', padding: 24 },
 
-  // 🔥 New logo styles
   logoContainer: {
     alignItems: 'center',
     marginBottom: 20,

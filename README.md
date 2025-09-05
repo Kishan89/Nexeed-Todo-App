@@ -31,16 +31,14 @@ A simple and functional **To-Do List** mobile application built using **React Na
 
 ## Screenshots
 
-![Sign Screen](assets/Demo/SignUp.jpeg)
-![Login Screen](assets/Demo/login.jpeg)
-![ForgotPassword Screen](assets/Demo/ForgotPassword.jpeg)  
-![Home Screen](assets/Demo/HomeScreen.jpeg)  
-![Add/Edit Task](assets/Demo/Edit.jpeg)  
+<img src="assets/Demo/SignUp.jpeg" width="250"/> <img src="assets/Demo/login.jpeg" width="250"/>
+<img src="assets/Demo/ForgotPassword.jpeg" width="250"/> <img src="assets/Demo/HomeScreen.jpeg" width="250"/>
+<img src="assets/Demo/Edit.jpeg" width="250"/> 
 
 ---
 
 ## Demo
-[Watch the app in action](assets/Demo/demo%20video.mp4)
+[Watch the app in action](assets/Demo/Demo%20Video.gif)
 
 ---
 
@@ -71,39 +69,49 @@ A simple and functional **To-Do List** mobile application built using **React Na
    npx expo start
 
 **Technical Choices:**
-- React Native & Expo: Quick development, cross-platform compatibility, and easy testing.
-- Firebase Firestore: Real-time sync, offline persistence, scalability, and simplicity for a small project.
-- React Hooks: Clear and maintainable state management.
-- Skeleton Loaders & Optimistic Updates: Ensures fast, responsive UI even on slow networks.
+- React Native & Expo: Fast development, cross-platform compatibility, and easy testing.
+  I chose this because it allows building both iOS and Android apps quickly with a single codebase.
+- Firebase Firestore: Real-time sync, offline persistence, and scalability.
+  Chosen for simplicity in cloud data storage and real-time updates for tasks.
+- React Hooks: Clean and maintainable state management.
+  Helps keep components functional and easy to understand.
+- Skeleton Loaders & Optimistic Updates:Smooth and responsive UI even on slow networks.
+  Improves UX by showing placeholders and immediate feedback on user actions.
 - LinearGradient & Dark Theme: Modern, visually appealing, and consistent UI.
-
+  Enhances the professional look of the app.
 
 ## Project Structure
+
 NEXEEDTODOAPP
-├── assets
-├── components
-│   ├── AuthLayout.js
-│   ├── Button.js
-│   ├── EditTaskModal.js
-│   ├── EmptyState.js
-│   ├── FilterTabs.js
-│   ├── HeaderBar.js
-│   ├── Input.js
-│   ├── TaskInput.js
-│   └── TaskItem.js
-├── config
-│   └── firebaseConfig.js
-├── navigation
-│   └── AppNavigator.js
-├── screens
-│   ├── ForgotPasswordScreen.js
-│   ├── HomeScreen.js
-│   ├── LoginScreen.js
-│   └── SignupScreen.js
-├── .gitignore
-├── App.js
-├── app.json
-└── index.js
+│ App.js
+│ app.json
+│ index.js
+│ .gitignore
+│
+├───assets
+│
+├───components
+│ │ AuthLayout.js
+│ │ Button.js
+│ │ EditTaskModal.js
+│ │ EmptyState.js
+│ │ FilterTabs.js
+│ │ HeaderBar.js
+│ │ Input.js
+│ │ TaskInput.js
+│ │ TaskItem.js
+│
+├───config
+│ │ firebaseConfig.js
+│
+├───navigation
+│ │ AppNavigator.js
+│
+└───screens
+│ ForgotPasswordScreen.js
+│ HomeScreen.js
+│ LoginScreen.js
+│ SignupScreen.js
 
 ## Future Improvements
 - Push Notifications for task reminders.

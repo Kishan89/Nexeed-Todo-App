@@ -5,23 +5,22 @@ import {
   getAuth,
   getReactNativePersistence,
 } from "firebase/auth";
-import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyABqkK0fGcmFwaU6nvaG4RX7zMVIW--vIY",
-  authDomain: "nexeedtodoapp.firebaseapp.com",
-  projectId: "nexeedtodoapp",
-  storageBucket: "nexeedtodoapp.firebasestorage.app",
-  messagingSenderId: "583098998013",
-  appId: "1:583098998013:web:d93de130ee23729200f294",
-  measurementId: "G-K34DKVDFET",
+  apiKey: "AIzaSyBy9d1C0YkLGJH1U4JmMf_HtnWlJIhj810",
+  authDomain: "todo-app-d5254.firebaseapp.com",
+  projectId: "todo-app-d5254",
+  storageBucket: "todo-app-d5254.firebasestorage.app",
+  messagingSenderId: "660967141181",
+  appId: "1:660967141181:web:cddf534f7a526a4d171f54",
+  measurementId: "G-F618Q561W3"
 };
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 let auth;
 try {
   auth = initializeAuth(app, {
-    persistence: getReactNativePersistence(ReactNativeAsyncStorage),
+    persistence: getReactNativePersistence(AsyncStorage),
   });
 } catch (e) {
   if (e.code === "auth/already-initialized") {
@@ -31,4 +30,5 @@ try {
   }
 }
 export const db = getFirestore(app);
+
 export { app, auth };

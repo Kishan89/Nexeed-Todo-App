@@ -1,6 +1,5 @@
-import React from "react";
-import { View, StatusBar, StyleSheet } from "react-native";
-import AppNavigator from "./navigation/AppNavigator";
+import { View, StatusBar, StyleSheet } from 'react-native';
+import AppNavigator from './navigation/AppNavigator';
 
 export default function App() {
   return (
@@ -14,6 +13,6 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0B0B1D",
+    backgroundColor: '#0B0B1D',
   },
 });

@@ -38,8 +38,9 @@ A simple and functional **To-Do List** mobile application built using **React Na
 ---
 
 ## Demo
+
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Kishan89/NexeedTodoApp/main/assets/Demo/Demo%20Video.gif" alt="App Demo" width="250"/>
+  <a href="https://drive.google.com/file/d/11mQwHDSawP7zfUovAC6Swq5_X0Sc_tro/view?usp=drive_link" target="_blank">Watch the App in Action</a>
 </p>
 
 ---

@@ -6,6 +6,7 @@ import {
   SafeAreaView,
   StatusBar,
   Animated,
+  Alert
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -111,15 +112,29 @@ const HomeScreen = ({ currentUser }) => {
     }
   };
 
-  const handleDeleteTask = async (taskId) => {
-    const originalTasks = [...tasks];
-    setTasks((prev) => prev.filter((t) => t.id !== taskId));
-    try {
-      await deleteDoc(doc(db, "tasks", taskId));
-    } catch {
-      setTasks(originalTasks);
-    }
-  };
+const handleDeleteTask = (taskId) => {
+  Alert.alert(
+    "Delete Task",
+    "Are you sure you want to delete this task?",
+    [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          const originalTasks = [...tasks];
+          setTasks((prev) => prev.filter((t) => t.id !== taskId));
+          try {
+            await deleteDoc(doc(db, "tasks", taskId));
+          } catch {
+            setTasks(originalTasks);
+          }
+        },
+      },
+    ]
+  );
+};
+
 
   const handleToggleComplete = async (task) => {
     const updatedTasks = tasks.map((t) =>
@@ -163,7 +178,16 @@ const HomeScreen = ({ currentUser }) => {
     }
   };
 
-  const handleLogout = () => auth.signOut();
+  const handleLogout = () => {
+  Alert.alert(
+    "Logout Confirmation",
+    "Are you sure you want to log out?",
+    [
+      { text: "Cancel", style: "cancel" },
+      { text: "Logout", style: "destructive", onPress: () => auth.signOut() },
+    ]
+  );
+};
 
   const getGreeting = () => {
     const hour = new Date().getHours();

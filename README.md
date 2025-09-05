@@ -31,14 +31,16 @@ A simple and functional **To-Do List** mobile application built using **React Na
 
 ## Screenshots
 
-<img src="assets/Demo/SignUp.jpeg" width="250"/> <img src="assets/Demo/login.jpeg" width="250"/>
+<img src="assets/Demo/SignUp.jpeg" width="250"/> <img src="assets/Demo/Login.jpeg" width="250"/>
 <img src="assets/Demo/ForgotPassword.jpeg" width="250"/> <img src="assets/Demo/HomeScreen.jpeg" width="250"/>
 <img src="assets/Demo/Edit.jpeg" width="250"/> 
 
 ---
 
 ## Demo
-[Watch the app in action](assets/Demo/Demo%20Video.gif)
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Kishan89/NexeedTodoApp/main/assets/Demo/Demo%20Video.gif" alt="App Demo" width="250"/>
+</p>
 
 ---
 
@@ -82,36 +84,34 @@ A simple and functional **To-Do List** mobile application built using **React Na
 
 ## Project Structure
 
-NEXEEDTODOAPP
-│ App.js
-│ app.json
-│ index.js
-│ .gitignore
-│
-├───assets
-│
-├───components
-│ │ AuthLayout.js
-│ │ Button.js
-│ │ EditTaskModal.js
-│ │ EmptyState.js
-│ │ FilterTabs.js
-│ │ HeaderBar.js
-│ │ Input.js
-│ │ TaskInput.js
-│ │ TaskItem.js
-│
-├───config
-│ │ firebaseConfig.js
-│
-├───navigation
-│ │ AppNavigator.js
-│
-└───screens
-│ ForgotPasswordScreen.js
-│ HomeScreen.js
-│ LoginScreen.js
-│ SignupScreen.js
+```markdown
+
+📁 NEXEEDTODOAPP/
+├── assets/
+├── components/
+│   ├── AuthLayout.js
+│   ├── Button.js
+│   ├── EditTaskModal.js
+│   ├── EmptyState.js
+│   ├── FilterTabs.js
+│   ├── HeaderBar.js
+│   ├── Input.js
+│   ├── TaskInput.js
+│   └── TaskItem.js
+├── config/
+│   └── firebaseConfig.js
+├── navigation/
+│   └── AppNavigator.js
+├── screens/
+│   ├── ForgotPasswordScreen.js
+│   ├── HomeScreen.js
+│   ├── LoginScreen.js
+│   └── SignupScreen.js
+├── .gitignore
+├── App.js
+├── app.json
+└── index.js
+```
 
 ## Future Improvements
 - Push Notifications for task reminders.
